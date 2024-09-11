@@ -9,13 +9,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Configuración de la base de datos PostgreSQL
-    const pool = new Pool({
-        host: 'localhost',
-        user: 'postgres', // Cambia según tu configuración
-        password: 'derby123',
-        database: 'turnosdb',
-        port: 5432, // Puerto por defecto para PostgreSQL
-    });
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL, // Usa la variable de entorno aquí
+  });
+  
 
 // Conectar a la base de datos
 pool.connect(err => {
