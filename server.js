@@ -1,24 +1,26 @@
 const express = require('express');
-const mysql = require('mysql2');
+const { Pool } = require('pg'); // Reemplazamos mysql2 por pg
 const session = require('express-session');
 const path = require('path');
 const moment = require('moment');
 require('moment/locale/es'); // Cargar localización en español
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Configuración de la base de datos
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'derbito14',
-    database: 'turnosdb'
-});
+// Configuración de la base de datos PostgreSQL
+    const pool = new Pool({
+        host: 'localhost',
+        user: 'postgres', // Cambia según tu configuración
+        password: 'derby123',
+        database: 'turnosdb',
+        port: 5432, // Puerto por defecto para PostgreSQL
+    });
 
-db.connect(err => {
+// Conectar a la base de datos
+pool.connect(err => {
     if (err) throw err;
-    console.log('Conectado a la base de datos MySQL.');
+    console.log('Conectado a la base de datos PostgreSQL.');
 });
 
 // Configuración de Express
@@ -52,12 +54,12 @@ app.get('/', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    const query = 'SELECT * FROM usuarios WHERE username = ?';
-    db.execute(query, [username], (err, results) => {
+    const query = 'SELECT * FROM usuario WHERE username = $1';
+    pool.query(query, [username], (err, result) => {
         if (err) throw err;
 
-        if (results.length > 0) {
-            const user = results[0];
+        if (result.rows.length > 0) {
+            const user = result.rows[0];
 
             // Comparar contraseñas en texto plano
             if (password === user.password) {
@@ -119,9 +121,9 @@ app.get('/turnos', (req, res) => {
     const queries = days.map(day => {
         const formattedDay = moment(day.date, 'DD/MM/YYYY').format('YYYY-MM-DD');
         return new Promise((resolve, reject) => {
-            db.query('SELECT * FROM reservas WHERE day = ?', [formattedDay], (err, results) => {
+            pool.query('SELECT * FROM reservas WHERE day = $1', [formattedDay], (err, result) => {
                 if (err) return reject(err);
-                resolve(results);
+                resolve(result.rows);
             });
         });
     });
@@ -154,16 +156,16 @@ app.post('/reservar', (req, res) => {
         return res.status(400).send('Datos incompletos.');
     }
 
-    // Convertir la fecha a formato MySQL (yyyy-mm-dd)
+    // Convertir la fecha a formato PostgreSQL (yyyy-mm-dd)
     const formattedDay = moment(day, 'DD/MM/YYYY').format('YYYY-MM-DD');
 
     // Insertar la reserva en la base de datos
     const query = `
-        INSERT INTO reservas (user, day, hour, pallets, domain, completed)
-        VALUES (?, ?, ?, ?, ?, 0)
+        INSERT INTO reservas (user_name, day, hour, pallets, domain, completed)
+        VALUES ($1, $2, $3, $4, $5, $6)
     `;
 
-    db.execute(query, [username, formattedDay, hour, pallets, domain], (err, result) => {
+    pool.query(query, [username, formattedDay, hour, pallets, domain, 0], (err, result) => {
         if (err) {
             console.error('Error al insertar la reserva:', err);
             return res.status(500).send('Error al realizar la reserva.');
@@ -184,14 +186,14 @@ app.get('/reservas', (req, res) => {
 
     const formattedDate = moment(date, 'DD/MM/YYYY').format('YYYY-MM-DD');
 
-    const query = 'SELECT * FROM reservas WHERE day = ?';
-    db.execute(query, [formattedDate], (err, results) => {
+    const query = 'SELECT * FROM reservas WHERE day = $1';
+    pool.query(query, [formattedDate], (err, result) => {
         if (err) {
             console.error('Error al obtener las reservas:', err);
             return res.status(500).send('Error al obtener reservas.');
         }
 
-        res.json(results);
+        res.json(result.rows);
     });
 });
 
@@ -209,16 +211,16 @@ app.post('/eliminar-reserva', (req, res) => {
         return res.status(400).send('Datos incompletos.');
     }
 
-    // Convertir la fecha a formato MySQL (yyyy-mm-dd)
+    // Convertir la fecha a formato PostgreSQL (yyyy-mm-dd)
     const formattedDay = moment(day, 'DD/MM/YYYY').format('YYYY-MM-DD');
 
     // Eliminar la reserva de la base de datos
     const query = `
         DELETE FROM reservas
-        WHERE day = ? AND hour = ? AND (user = ? OR ? = 'tradelog')
+        WHERE day = $1 AND hour = $2 AND (user_name = $3 OR $3 = 'tradelog')
     `;
 
-    db.execute(query, [formattedDay, hour, username, username], (err, result) => {
+    pool.query(query, [formattedDay, hour, username], (err, result) => {
         if (err) {
             console.error('Error al eliminar la reserva:', err);
             return res.status(500).send('Error al eliminar la reserva.');
