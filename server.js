@@ -9,11 +9,16 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Configuración de la base de datos PostgreSQL
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL, // Usa la variable de entorno aquí
-  });
-  
+const { Pool } = require('pg');
 
+// Configura la conexión con las variables de entorno
+const pool = new Pool({
+  host: process.env.dpg-crh1spaj1k6c73dqlnb0-a,      // Nombre del host desde la variable de entorno
+  port: process.env.5432,      // Puerto desde la variable de entorno
+  user: process.env.derbito,      // Usuario desde la variable de entorno
+  password: process.env.dpg-crh1spaj1k6c73dqlnb0-a, // Contraseña desde la variable de entorno
+  database: process.env.turnosdb  // Nombre de la base de datos desde la variable de entorno
+});
 // Conectar a la base de datos
 pool.connect(err => {
     if (err) throw err;
