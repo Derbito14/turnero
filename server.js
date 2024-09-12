@@ -9,18 +9,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Configuración de la base de datos PostgreSQL
-const { Pool } = require('pg');
-
 const pool = new Pool({
-  user: 'turnosdb_mlwb_user',
-  host: 'dpg-crh2sd5svqrc7387d9a0-a',
-  database: 'turnosdb_mlwb',
-  password: 'VSTI551tFtj2M891Kpg712sEn2crBAtm',
-  port: 5432,
+    connectionString: 'postgresql://turnosdb_mlwb_user:VSTI551tFtj2M891Kpg712sEn2crBAtm@dpg-crh2sd5svqrc7387d9a0-a.oregon-postgres.render.com/turnosdb_mlwb',
 });
 
 module.exports = pool;
-
 
 // Conectar a la base de datos
 pool.connect(err => {
