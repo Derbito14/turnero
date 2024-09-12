@@ -11,14 +11,17 @@ const port = process.env.PORT || 3000;
 // Configuración de la base de datos PostgreSQL
 const { Pool } = require('pg');
 
-// Configura la conexión con las variables de entorno
 const pool = new Pool({
-    host: process.env.DB_HOST,      // Nombre del host desde la variable de entorno
-    port: process.env.DB_PORT,      // Puerto desde la variable de entorno
-    user: process.env.DB_USER,      // Usuario desde la variable de entorno
-    password: process.env.DB_PASSWORD, // Contraseña desde la variable de entorno
-    database: process.env.DB_NAME  // Nombre de la base de datos desde la variable de entorno
-  });
+  user: 'turnosdb_mlwb_user',
+  host: 'dpg-crh2sd5svqrc7387d9a0-a',
+  database: 'turnosdb_mlwb',
+  password: 'VSTI551tFtj2M891Kpg712sEn2crBAtm',
+  port: 5432,
+});
+
+module.exports = pool;
+
+
 // Conectar a la base de datos
 pool.connect(err => {
     if (err) throw err;
