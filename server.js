@@ -11,7 +11,12 @@ const port = process.env.PORT || 3000;
 // Configuración de la base de datos PostgreSQL
 const pool = new Pool({
     connectionString: 'postgresql://turnosdb_mlwb_user:VSTI551tFtj2M891Kpg712sEn2crBAtm@dpg-crh2sd5svqrc7387d9a0-a.oregon-postgres.render.com/turnosdb_mlwb',
+    ssl: {
+        rejectUnauthorized: false  // Cambia esta opción si tu base de datos requiere un certificado específico
+    }
 });
+
+module.exports = pool;
 
 module.exports = pool;
 
