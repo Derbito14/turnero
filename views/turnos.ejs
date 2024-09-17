@@ -6,16 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Turnos</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
+    <header>
+        <h1>Turnero Tradelog Cordoba</h1>
+    </header>
     <div class="container mt-4">
         <!-- Mensaje de bienvenida -->
         <div class="row mb-3">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="font-weight-bold">Bienvenido, <%= username.toUpperCase() %></span>
-                    <a href="/logout" class="btn btn-link">Cerrar sesión</a>
+                    <% if (isTradeLog) { %>
+                        <button id="export-btn" class="btn btn-secondary">Exportar a Excel</button>
+                    <% } %>
+                    <a href="/logout" class="btn btn-secondary">Cerrar sesión</a>
                 </div>
             </div>
         </div>
@@ -24,12 +31,12 @@
         <div class="row">
             <!-- Panel izquierdo -->
             <div class="col-md-3 left-panel">
-                <h3>Seleccione un día.</h3>
+                <h4>Seleccione un día:</h4>
                 <ul class="list-unstyled">
-                    <% days.forEach(day=> { %>
+                    <% days.forEach(day => { %>
                         <li>
-                            <button class="btn btn-primary btn-day"
-                                onclick="showHours('<%= day.dayName %>', '<%= day.date %>', '<%= day.dayType %>')">
+                            <button class="btn btn-day"
+                                onclick="showHours('<%= day.dayName %>', '<%= day.date %>', '<%= day.dayType %>', <%= day.index %>)">
                                 <%= day.dayName %> <%= day.date %>
                             </button>
                         </li>
@@ -38,15 +45,21 @@
             </div>
             <!-- Panel derecho -->
             <div class="col-md-9 right-panel">
-                <p id="hours-list"></p>
+                <h3>Turnos disponibles</h3>
+                <div id="hours-list">
+                    <!-- Aquí se mostrará la lista de horas disponibles -->
+                </div>
             </div>
         </div>
     </div>
+    
 
-    <!-- Incluye los scripts de Bootstrap y el script personalizado al final del body -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    
     <script>
         // Definir las variables globales
         window.isTradeLog = <%= JSON.stringify(isTradeLog) %>;
@@ -56,11 +69,13 @@
         let currentDayName = '';
         let currentDate = '';
         let currentDayType = '';
+        let currentDayIndex = 0;
 
-        function showHours(dayName, date, dayType) {
+        function showHours(dayName, date, dayType, index) {
             currentDayName = dayName;
             currentDate = date;
             currentDayType = dayType;
+            currentDayIndex = index;
 
             const rightPanel = document.getElementById('hours-list');
             let hoursHtml = '';
@@ -127,46 +142,62 @@
         function renderReservationFields(date, time) {
             const reserved = reservations[date]?.find(reservation => formatTime(reservation.hour) === time);
 
+            // Verifica si el día actual está dentro de los dos primeros días
+            const isFirstTwoDays = currentDayIndex < 2;
+
             if (reserved) {
                 const deleteButton = isTradeLog || reserved.user_name === currentUser
                     ? `<button type="button" class="btn btn-danger btn-sm ml-2" onclick="eliminarReserva('${date}', '${time}')">X</button>`
                     : '';
 
-                const checkButton = isTradeLog
+                const checkButton = isTradeLog && isFirstTwoDays
                     ? `<button type="button" class="btn btn-success btn-sm ml-2" onclick="checkReservation('${date}', '${time}')">✓</button>`
                     : '';
 
+                if (reserved.completed) {
+                    return `
+                <div class="d-flex align-items-center">
+                    <span class="time-label">${time}</span>
+                    <span> &nbsp Turno completado por ${reserved.user_name}.</span>
+                     ${deleteButton}
+                </div>
+            `;
+                }
+
                 if (isTradeLog) {
                     return `
-                        <div class="d-flex align-items-center">
-                            <span class="time-label">${time}</span>
-                            <span>Turno no disponible reservado por ${reserved.user_name}</span>
-                            ${deleteButton}
-                            ${checkButton}
-                        </div>
-                    `;
+                <div class="d-flex align-items-center">
+                    <span class="time-label">${time}</span>
+                    <span> &nbsp Turno no disponible reservado por ${reserved.user_name}.</span>
+                    ${deleteButton}
+                    ${checkButton}
+                </div>
+            `;
                 } else {
                     return `
-                        <div class="d-flex align-items-center">
-                            <span class="time-label">${time}</span>
-                            <span>Turno no disponible${reserved.user_name === currentUser ? ', reservado por ti' : ''}</span>
-                            ${deleteButton}
-                        </div>
-                    `;
+                <div class="d-flex align-items-center">
+                    <span class="time-label">${time}</span>
+                    <span> &nbsp Turno no disponible${reserved.user_name === currentUser ? ', reservado por ti' : ''}.</span>
+                    ${deleteButton}
+                </div>
+            `;
                 }
             }
 
             return `
-                <div class="d-flex align-items-center">
-                    <span class="time-label">${time}</span>
-                    <% if (!isTradeLog) { %>
-                        <input type="number" id="pallets-${date}-${time}" placeholder="Pallets" min="1" max="99" class="form-control form-control-sm mx-2" required>
-                        <input type="text" id="domain-${date}-${time}" placeholder="Dominio" pattern="[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2}" title="Formato de patente: AAA123 o AA123BB" class="form-control form-control-sm mx-2" required>
-                        <button type="button" class="btn btn-secondary btn-reserve" onclick="reservarTurno('${date}', '${time}')">Reservar</button>
-                    <% } %>
-                </div>
-            `;
+        <div class="d-flex align-items-center">
+            <span class="time-label">${time}</span>
+            <% if (!isTradeLog) { %>
+                <input type="number" id="pallets-${date}-${time}" placeholder="Cant. Pallets" min="1" max="99" class="form-control form-control-sm mx-2" required>
+                <input type="text" id="domain-${date}-${time}" placeholder="Dominio" pattern="[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2}" title="Formato de patente: AAA123 o AA123BB" class="form-control form-control-sm mx-2" required>
+                <button type="button" class="btn btn-secondary btn-reserve" onclick="reservarTurno('${date}', '${time}')">Reservar</button>
+            <% } %>
+        </div>
+    `;
         }
+
+
+
 
         function eliminarReserva(date, time) {
             if (confirm('¿Estás seguro de que deseas eliminar esta reserva?')) {
@@ -180,34 +211,70 @@
                         hour: time
                     })
                 })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Reserva eliminada con éxito.');
+                            // Actualizar las reservas después de eliminar una reserva
+                            showHours(currentDayName, currentDate, currentDayType);
+                        } else {
+                            alert('Error al eliminar la reserva.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al realizar la solicitud:', error);
+                        alert('Error al realizar la solicitud.');
+                    });
+            }
+        }
+
+        function checkReservation(date, time) {
+            fetch('/check-reserva', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    day: date,
+                    hour: time
+                })
+            })
                 .then(response => {
                     if (response.ok) {
-                        alert('Reserva eliminada con éxito.');
-                        // Actualizar las reservas después de eliminar una reserva
+                        alert('Reserva marcada como completada.');
+                        // Actualizar las reservas después de marcar la reserva como completada
                         showHours(currentDayName, currentDate, currentDayType);
                     } else {
-                        alert('Error al eliminar la reserva.');
+                        alert('Error al marcar la reserva como completada.');
                     }
                 })
                 .catch(error => {
                     console.error('Error al realizar la solicitud:', error);
                     alert('Error al realizar la solicitud.');
                 });
-            }
         }
 
-        function checkReservation(date, time) {
-            // Aquí puedes agregar la lógica para marcar una reserva si es necesario
-            alert('Reserva marcada como revisada.');
-        }
 
         function reservarTurno(date, time) {
-            const pallets = document.getElementById(`pallets-${date}-${time}`).value;
-            const domain = document.getElementById(`domain-${date}-${time}`).value;
+            const palletsInput = document.getElementById(`pallets-${date}-${time}`);
+            const domainInput = document.getElementById(`domain-${date}-${time}`);
 
-            // Validar que ambos campos estén completos
+            const pallets = palletsInput.value;
+            const domain = domainInput.value;
+
+            // Validación manual
             if (!pallets || !domain) {
                 alert('Por favor complete todos los campos.');
+                return;
+            }
+
+            if (pallets < 1 || pallets > 99) {
+                alert('El número de pallets debe estar entre 1 y 99.');
+                return;
+            }
+
+            const domainPattern = /^[A-Z]{3}[0-9]{3}|[A-Z]{2}[0-9]{3}[A-Z]{2}$/;
+            if (!domainPattern.test(domain)) {
+                alert('El formato del dominio es incorrecto. Debe ser AAA123 o AA123BB.');
                 return;
             }
 
@@ -229,8 +296,15 @@
                         alert('Reserva realizada con éxito.');
                         // Actualizar las reservas después de realizar una reserva
                         showHours(currentDayName, currentDate, currentDayType);
+                    } else if (response.status === 400) {
+                        return response.text(); // Obtener el mensaje de error del servidor
                     } else {
-                        alert('Error al realizar la reserva.');
+                        throw new Error('Error al realizar la reserva.');
+                    }
+                })
+                .then(errorMessage => {
+                    if (errorMessage) {
+                        alert(errorMessage); // Mostrar el mensaje de error en una alerta
                     }
                 })
                 .catch(error => {
@@ -259,6 +333,40 @@
             const [hour, minute] = timeString.split(':');
             return `${hour}:${minute}`;
         }
+
+        // Función para formatear la fecha en el formato DD-MM-AAAA
+        function formatDateForExport(dateString) {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return dateString; // Retorna el valor original si no es una fecha válida
+            }
+            const day = String(date.getDate()).padStart(2, '0'); // Días del 01 al 31
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses del 01 al 12
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        document.getElementById('export-btn')?.addEventListener('click', () => {
+            fetch('/exportar-reservas')
+                .then(response => response.json())
+                .then(data => {
+                    // Formatear las fechas en los datos justo antes de la exportación
+                    const formattedData = data.map(row => ({
+                        ...row,
+                        day: formatDateForExport(row.day),
+                        // Puedes formatear la hora si es necesario (opcional)
+                        hour: row.hour.slice(0, 5) // Elimina los segundos de la hora, si es necesario
+                    }));
+
+                    const ws = XLSX.utils.json_to_sheet(formattedData);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Reservas');
+                    XLSX.writeFile(wb, 'reservas.xlsx');
+                })
+                .catch(error => console.error('Error al exportar reservas:', error));
+        });
+
+
     </script>
 </body>
 

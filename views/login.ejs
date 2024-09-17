@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
-    <h1>Login</h1>
-    <% if (error) { %>
-        <div style="color: red;"><%= error %></div>
-    <% } %>
-    <form action="/login" method="POST">
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Iniciar sesión</button>
-    </form>
+    <header>
+        <h1>Turnero Tradelog Cordoba</h1>
+    </header>
+    <div class="container mt-4">
+        <form action="/login" method="POST">
+            <h1>Iniciar sesión</h1>
+            <% if (error) { %>
+                <div style="color: red; text-align: center;"><%= error %></div>
+            <% } %>
+            <label for="username">Usuario:</label>
+            <input type="text" id="username" name="username" class="form-control" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        </form>
+    </div>
+    <footer>
+        <p>&copy; 2024 Turnero Tradelog Cordoba</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

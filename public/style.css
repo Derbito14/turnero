@@ -1,0 +1,205 @@
+/* Estilo global */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f4f8; /* Color de fondo general */
+    color: #333; /* Color de texto principal */
+    margin: 0;
+    padding: 0;
+}
+
+/* Cabecera */
+header {
+    background-color: #003366; /* Azul marino para la cabecera */
+    color: #ffffff; /* Color del texto de la cabecera */
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem; /* Tamaño del texto del título */
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Paneles */
+.left-panel, .right-panel {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Panel derecho */
+.right-panel {
+    padding: 20px;
+}
+
+/* Botones */
+.btn {
+    border-radius: 5px;
+    padding: 10px 20px; /* Ajustar el padding para un tamaño de botón uniforme */
+    color: #ffffff;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    display: inline-block;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn-primary {
+    background-color: #003366; /* Azul marino para el botón primario */
+}
+
+.btn-primary:hover {
+    background-color: #00274d; /* Azul marino oscuro en hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Agregar sombra en hover */
+}
+
+.btn-success {
+    background-color: #003366; /* Color de fondo del botón de éxito */
+    scale: 0.5;
+}
+
+.btn-success:hover {
+    background-color: #041b42; /* Color de fondo del botón de éxito en hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Agregar sombra en hover */
+}
+
+.btn-reserve {
+    scale: 0.8;
+}
+
+.btn-danger {
+    background-color: #003366; /* Color de fondo del botón de error */
+    scale: 0.5;
+}
+
+.btn-danger:hover {
+    background-color: #041b42; /* Color de fondo del botón de error en hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Agregar sombra en hover */
+}
+
+.btn-secondary {
+    background-color: #003366; /* Color de fondo del botón secundario */
+}
+
+#export-btn{
+    background-color: #003366; /* Color de fondo del botón secundario */
+}
+#export-btn:hover{
+    background-color: #041b42; /* Color de fondo del botón secundario en hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Agregar sombra en hover */
+}
+
+.btn-secondary:hover {
+    background-color: #041b42; /* Color de fondo del botón secundario en hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Agregar sombra en hover */
+}
+
+/* Estilo para los botones en lista */
+.btn-day {
+    background-color: #003366; /* Azul marino para los botones de la lista */
+    color: #ffffff;
+    width: 100%; /* Botones ocupan todo el ancho del contenedor */
+    margin-bottom: 10px; /* Espacio entre botones */
+}
+
+/* Formulario */
+form {
+    background-color: #ffffff; /* Color de fondo del formulario */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px; /* Hacer el formulario más angosto */
+    margin: 0 auto; /* Centrar el formulario */
+}
+
+/* Estilo del encabezado del formulario */
+form h1 {
+    color: #003366; /* Azul marino para el título del formulario */
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.5rem; /* Tamaño del texto del título */
+}
+
+/* Estilo de las etiquetas del formulario */
+form label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Estilo de los campos del formulario */
+form input[type="text"], form input[type="password"] {
+    width: calc(100% - 20px); /* Ajustar el ancho del campo */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Estilo del botón del formulario */
+form button {
+    background-color: #003366; /* Azul marino para el botón del formulario */
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%; /* Botón ocupa todo el ancho del formulario */
+    font-size: 1rem; /* Tamaño del texto del botón */
+}
+
+form button:hover {
+    background-color: #00274d; /* Azul marino oscuro en hover */
+}
+
+/* Pie de página */
+footer {
+    background-color: #003366; /* Azul marino para el footer */
+    color: #ffffff; /* Color del texto del footer */
+    padding: 20px;
+    text-align: center;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Estilos adicionales */
+.list-unstyled {
+    list-style-type: none;
+    padding: 0;
+}
+
+.time-label {
+    font-weight: bold;
+}
+
+.font-weight-bold {
+    font-weight: bold;
+}
+
+/* Estilo para los títulos en el panel derecho */
+.right-panel h3 {
+    font-size: 1.5rem; /* Tamaño de fuente más pequeño para los subtítulos */
+    color: #003366; /* Azul marino para los títulos en el panel derecho */
+    margin-bottom: 20px; /* Espacio debajo de los títulos */
+}
+
+/* Espaciado en el panel derecho */
+.right-panel ul {
+    padding-left: 0;
+}
+
+.right-panel li {
+    margin-bottom: 15px; /* Espacio entre elementos de la lista */
+}
+
+.right-panel p {
+    margin-bottom: 20px; /* Espacio debajo de los párrafos */
+}
