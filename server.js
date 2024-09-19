@@ -23,6 +23,7 @@ module.exports = pool;
 
 
 
+
 // Conectar a la base de datos
 pool.connect(err => {
     if (err) throw err;
@@ -45,6 +46,20 @@ app.use(session({
 // Configuración de EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Ruta para realizar la reserva
+// Importar nodemailer
+const nodemailer = require('nodemailer');
+
+// Configuración del transportador de nodemailer
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'derbiito@gmail.com', // Tu dirección de correo
+        pass: 'ccsd zgjh twpx ikeu' // Contraseña de aplicación generada
+    }
+});
+
 
 // Función para capitalizar el primer carácter de una cadena
 function capitalizeFirstLetter(string) {
@@ -145,7 +160,7 @@ app.get('/turnos', (req, res) => {
 });
 
 
-// Ruta para realizar la reserva
+
 // Ruta para realizar la reserva
 app.post('/reservar', async (req, res) => {
     const { day, hour, pallets, domain } = req.body;
@@ -168,12 +183,10 @@ app.post('/reservar', async (req, res) => {
         const reservationCountResult = await pool.query('SELECT COUNT(*) FROM reservas WHERE user_name = $1 AND day = $2', [username, formattedDay]);
         const reservationCount = parseInt(reservationCountResult.rows[0].count);
 
-
         // Establecer el límite de reservas basado en si el usuario está en la lista de excepcionales
         const limit = exceptionalUsers.has(username) ? 5 : 2;
 
         if (reservationCount >= limit) {
-
             return res.status(400).send(`Has alcanzado el límite de reservas para el día ${day}.`);
         }
 
@@ -184,14 +197,37 @@ app.post('/reservar', async (req, res) => {
         `;
         await pool.query(query, [username, formattedDay, hour, pallets, domain, 0]);
 
+        // Obtener el correo electrónico del usuario
+        const userResult = await pool.query('SELECT email FROM usuario WHERE username = $1', [username]);
+        if (userResult.rows.length === 0) {
+            return res.status(404).send('Correo electrónico no encontrado para el usuario.');
+        }
+        const userEmail = userResult.rows[0].email;
+
+        // Verifica que el correo electrónico no esté vacío
+        if (!userEmail) {
+            return res.status(400).send('El correo electrónico del usuario no está definido.');
+        }
+
+        // Enviar el correo de confirmación
+        const mailOptions = {
+            from: 'derbiito@gmail.com', // Tu dirección de correo
+            to: userEmail, // Usar el correo del usuario
+            subject: 'Confirmación de Reserva',
+            text: `Hola ${username},\n\nGracias por usar nuestra aplicación. Aquí están los detalles de tu reserva:\n\nFecha: ${day}\nHora: ${hour}\nPallets: ${pallets}\nDominio: ${domain}\n\n¡Esperamos verte pronto!`
+        };
+
+        await transporter.sendMail(mailOptions);
+
         // Reserva realizada con éxito
         res.status(200).send('Reserva realizada con éxito.');
     } catch (err) {
         console.error('Error al realizar la reserva:', err);
         res.status(500).send('Error al realizar la reserva.');
     }
-
 });
+
+
 
 // Ruta para obtener reservas para un día específico
 app.get('/reservas', (req, res) => {
@@ -317,7 +353,7 @@ app.get('/exportar-reservas', (req, res) => {
         }
 
         const reservations = result.rows.map(reservation => ({
-            day: reservation.day,
+            day: moment(reservation.day).format('DD-MM-YYYY'), // Ajusta el formato
             hour: reservation.hour,
             pallets: reservation.pallets,
             domain: reservation.domain,

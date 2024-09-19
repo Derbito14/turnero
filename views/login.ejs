@@ -20,7 +20,7 @@
                 <div style="color: red; text-align: center;"><%= error %></div>
             <% } %>
             <label for="username">Usuario:</label>
-            <input type="text" id="username" name="username" class="form-control" required>
+            <input type="text" id="username" name="username" class="form-control" oninput="this.value = this.value.toLowerCase();" required>
             <label for="password">Contraseña:</label>
             <input type="password" id="password" name="password" class="form-control" required>
             <button type="submit" class="btn btn-primary">Iniciar sesión</button>
